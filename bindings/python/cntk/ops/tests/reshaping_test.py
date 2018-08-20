@@ -181,7 +181,9 @@ SLICE_TEST_CASES_STATIC = [
     ([[1,2],[-3,4]], (0,2,1, -1), [[2, 1],[4, -3]]),
     ([[1,2],[-3,4]], (0,2,0, 2), [[1, 2]]),
 	([[1,2],[-3,4], [-2,5], [7,8], [-9,6]], (0,5,0,2), [[1,2],[-2,5],[-9,6]]),
-	([[1,2],[-3,4], [-2,5], [7,8], [-9,6]], (0,5,0,-2), [[-9,6],[-2,5],[1,2]])
+	([[1,2],[-3,4], [-2,5], [7,8], [-9,6]], (0,5,0,-2), [[-9,6],[-2,5],[1,2]]),
+    # indice out of bound tests.
+    ([[1,2],[-3,4], [-2,5], [7,8], [-9,6]], ([2,0], [7, 1000], [0,1], [1, 1]), [[-2,5],[7,8],[-9,6]]),
 ]
 
 @pytest.mark.parametrize("input_data, slice_params, expected_result",
@@ -194,13 +196,20 @@ def test_op_slice(input_data, slice_params, expected_result, device_id, precisio
         '''
         Creates a NumPy slicing array from slice operator's arguments
         '''
+        if not isinstance(axis, list):
+            axis = [axis]
+            beg_index = [beg_index]
+            end_index = [end_index]
+            strides = [strides]
         ax_slices = []
+        j = 0
         for i in range(0, len(x.shape)):
-            if i == axis:
-                if end_index >= x.shape[i]:
-                    ax_slices.append(slice(beg_index, None, abs(strides)))
+            if i in axis:
+                if end_index[j] >= x.shape[i]:
+                    ax_slices.append(slice(beg_index[j], None, abs(strides[j])))
                 else:
-                    ax_slices.append(slice(beg_index, end_index, abs(strides)))
+                    ax_slices.append(slice(beg_index[j], end_index[j], abs(strides[j])))
+                j += 1
             else:
                 ax_slices.append(slice(None))  # corresponds to ':'
         return ax_slices

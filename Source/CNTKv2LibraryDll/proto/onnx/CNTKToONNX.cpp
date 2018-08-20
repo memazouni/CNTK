@@ -3343,7 +3343,8 @@ void CNTKToONNXHelper::CopyAttributes(const FunctionPtr& src, LotusIR::Node* nod
         else if (src->OpName() == L"Unsqueeze")
         {
             std::vector<Axis> axes = AsVector<Axis>(src->Attributes()[L"axisVec"].Value<std::vector<DictionaryValue>>());
-            std::vector<int64_t> ax = ConvertAxesToOnnx(axes, src->Inputs()[0]);
+            // Pass in output operand, such that Unsqueeze axes can be converted based on output rank. 
+            std::vector<int64_t> ax = ConvertAxesToOnnx(axes, src->Outputs()[0]);
 
             node->AddAttribute("axes", ax);
         }
