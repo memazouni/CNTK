@@ -2696,8 +2696,6 @@ FunctionPtr ONNXToCNTKHelper::CreateFunction(const Node *node, const std::vector
     // { L"", "Split)
     else if (onnxOpName == "Slice")
     {
-        std::vector<Axis> axes = ConvertONNXAxesToCNTKCppApi(GetNamedAttributeAsInt64Vec(node, "axes"), inputs[0]);
-
         std::vector<int64_t> starts64 = GetNamedAttributeAsInt64Vec(node, "starts");
         std::vector<int64_t> ends64 = GetNamedAttributeAsInt64Vec(node, "ends");
 
@@ -2716,10 +2714,13 @@ FunctionPtr ONNXToCNTKHelper::CreateFunction(const Node *node, const std::vector
                 e = 0;
         }
 
+        std::vector<Axis> axes;
+        if (HasNamedAttribute(node, "axes"))
+            axes = ConvertONNXAxesToCNTKCppApi(GetNamedAttributeAsInt64Vec(node, "axes"), inputs[0]);
         // axes is optional so provide a default
         if (axes.empty())
         {
-            for (int i = 0; i < starts.size(); i++)
+            for (int i = starts.size() - 1; i >= 0; i--)
             {
                 Axis axis(i);
                 axes.push_back(axis);
