@@ -2966,10 +2966,11 @@ void CNTKToONNXHelper::ProcessInputs(const FunctionPtr& src,
         {
             // ONNX1.2 reshape node take shape as input instead of attribute. 
 
-            // We can construct the shape input for onnx by two ways: 1. cntk node output shape, or 2. cntk node attribute "newShape".
-            // If there attribute "newShape" is missing, or attributes "beginAxis" and "endAxis" exists, we use cntk node output shape.
-            // such that we don't need to duplicate the shape inference logic here. 
-            // Otherwise we use the cntk node attribute "newShape". 
+            // Shape input for onnx node can be constructed from two shapes: either 1. cntk node output shape, or 2. cntk node attribute "newShape".
+            // CNTK node output shape is used if either the attribute "newShape" is missing, or if attributes "beginAxis" and "endAxis" exists. 
+            // This way we avoid duplicating the logic for handling "begin/endAxis". 
+            // Otherwise CNTK node attribute "newShape" is used. It is always preferred to use the original attribute, 
+            // especially in cases where the given model is imported/exported multiple times. 
             bool useOutputShape = [&]() {
                 if (!src->Attributes().Contains(L"newShape") || ((NDShape)src->Attributes()[L"newShape"].Value<NDShape>()).Rank() == 0)
                     return true;
