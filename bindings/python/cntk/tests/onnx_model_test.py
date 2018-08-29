@@ -36,12 +36,12 @@ output_filename_pattern = re.compile('output_[0-9]+.pb')
 
 skip_model_names = [
     # Convolution Nan issue on Linux. 
-    'shufflenet',
+    # 'shufflenet',
 ]
 
 skip_round_trip_model_names = [
     # Convolution Nan issue on Linux. 
-    'shufflenet',
+    # 'shufflenet',
 ]
 
 @pytest.mark.parametrize('model_name, round_trip', 
